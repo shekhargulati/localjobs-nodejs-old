@@ -35,7 +35,9 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/jobs', job.list);
 app.get('/jobs/new',job.new);
-app.post('/jobs/new',job.save)
+app.post('/jobs/new',job.save);
+app.get('/jobs/search',job.searchPage);
+app.get('/api/jobs/:skills' , job.search)
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

@@ -22,9 +22,9 @@ var gm = require('googlemaps');
 var util = require('util');
 
 exports.list = function(req, res){
-	jobs.find().sort({createdOn: -1} , function(err , docs){
+	jobs.find().limit(20).sort({createdOn: -1} , function(err , docs){
 		if(!err){
-			res.send(docs);
+			res.render("all_jobs", {"title" : "Recently created 20 Jobs", "docs": docs});
 		}else{
 			res.send("Error "+err);
 		}
@@ -74,7 +74,7 @@ exports.save = function(req , res){
 			var lng = result.results[0].geometry.location.lng;
 			console.log("Latitude "+lat);
 			console.log("Longitude "+lng);
-			
+
 			job.lngLat = [lng , lat];
 			
 			jobs.save(job , function(err , saved){
@@ -91,3 +91,23 @@ exports.save = function(req , res){
 
 };
 
+exports.searchPage = function(req , res){
+	res.render("search_job" , {"title" :"Search Jobs"});	
+}
+
+exports.search = function(req , res){
+	var lat = parseFloat(req.query.lat);
+  	var lng = parseFloat(req.query.lng);
+  	var skills = req.params.skills.split(",");
+  	console.log(lat + " , " + lng + " , " + skills);
+  	jobs.find({"skills" : {"$in" : skills},"lngLat" : {"$near": [lng , lat]}} , 
+  		function(err , docs){
+  			if(!err){
+  				res.header("Content-Type","application/json");
+  				res.send(JSON.stringify(docs));
+  			}else{
+  				res.send("Error "+err);
+  			}
+  			
+  	});
+}
