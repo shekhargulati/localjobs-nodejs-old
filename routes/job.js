@@ -22,7 +22,14 @@ var gm = require('googlemaps');
 var util = require('util');
 
 exports.list = function(req, res){
-  res.send("respond with a resource");
+	jobs.find().sort({createdOn: -1} , function(err , docs){
+		if(!err){
+			res.send(docs);
+		}else{
+			res.send("Error "+err);
+		}
+	});
+  	
 };
 
 exports.new = function(req , res){
@@ -38,26 +45,17 @@ exports.save = function(req , res){
 		companyName = req.body["company.name"],
 		companyWebSite = req.body["company.website"],
 		companyContactEmail = req.body["company.contact.email"],
-		companyContactTelephone = req.body["company.contact.telephone"];
-
-
-	var skills = _underscore.map(req.body.skills.split(",") , 
+		companyContactTelephone = req.body["company.contact.telephone"],
+		skills = _underscore.map(req.body.skills.split(",") , 
 					function(element){return element.trim().toLowerCase();});
 
-	gm.geocode(location , function(err , result){
-		if(err){
-			console.log(err);
-		}else{
-			var lat = result.results[0].geometry.location.lat;
-			var lng = result.results[0].geometry.location.lng;
-			console.log("Latitude "+lat);
-			console.log("Longitude "+lng);
-			var job = {
+	var job = {
 				"title" : title,
 				"description" : description,
 				"skills" : skills,
 				"location" : location,
-				"lngLat" : [lng , lat],
+				"lngLat" : [],
+				"createdOn" : new Date(),
 				"company" : {
 					"name" :companyName,
 					"website" : companyWebSite,
@@ -67,7 +65,18 @@ exports.save = function(req , res){
 					}
 				}
 			}
-			console.log(job);
+	
+	gm.geocode(location , function(err , result){
+		if(err){
+			console.log(err);
+		}else{
+			var lat = result.results[0].geometry.location.lat;
+			var lng = result.results[0].geometry.location.lng;
+			console.log("Latitude "+lat);
+			console.log("Longitude "+lng);
+			
+			job.lngLat = [lng , lat];
+			
 			jobs.save(job , function(err , saved){
 				if(err || !saved){
 					console.log("Job not saved");
@@ -75,12 +84,10 @@ exports.save = function(req , res){
 					console.log("Job saved..");
 				}
 			});
-			res.send("Data saved ..");
+			res.redirect('/jobs');
 		}
 		
 	});
 
-	
-	
 };
 
