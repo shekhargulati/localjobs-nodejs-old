@@ -100,8 +100,7 @@ exports.search = function(req , res){
   	var lng = parseFloat(req.query.lng);
   	var skills = req.params.skills.split(",");
   	console.log(lat + " , " + lng + " , " + skills);
-  	jobs.find({"skills" : {"$in" : skills},"lngLat" : {"$near": [lng , lat]}} , 
-  		function(err , docs){
+  	jobs.find({"skills" : {"$in" : skills},"lngLat" : {"$near": [lng , lat]}}).limit(10).sort({"createdOn":-1},function(err , docs){
   			if(!err){
   				res.header("Content-Type","application/json");
   				res.send(JSON.stringify(docs));
