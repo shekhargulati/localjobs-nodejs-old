@@ -14,6 +14,7 @@ if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
 }
 
 var mongojs = require("mongojs");
+var _underscore = require("underscore");
 
 var db = mongojs(connection_string, ['localjobs']);
 var jobs = db.collection("jobs");
@@ -39,8 +40,9 @@ exports.save = function(req , res){
 		companyContactEmail = req.body["company.contact.email"],
 		companyContactTelephone = req.body["company.contact.telephone"];
 
-	var skills = [];
-	req.body.skills.split(",").forEach(function(e){skills.push(e.trim().toLowerCase())});
+
+	var skills = _underscore.map(req.body.skills.split(",") , 
+					function(element){return element.trim().toLowerCase();});
 
 	gm.geocode(location , function(err , result){
 		if(err){
@@ -65,7 +67,7 @@ exports.save = function(req , res){
 					}
 				}
 			}
-	
+			console.log(job);
 			jobs.save(job , function(err , saved){
 				if(err || !saved){
 					console.log("Job not saved");
@@ -79,4 +81,6 @@ exports.save = function(req , res){
 	});
 
 	
-};	
+	
+};
+
